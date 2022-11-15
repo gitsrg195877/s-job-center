@@ -1,11 +1,14 @@
-package com.srg.scheduledcore.core;
+package com.srg.scheduledcore.service.impl;
 
 import com.srg.scheduledcore.entity.Task;
 import com.srg.scheduledcore.mapper.TaskMapper;
+import com.srg.scheduledcore.utils.CronUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,59 +18,89 @@ import java.util.Map;
  * @create: 2022/10/2
  * @description:
  **/
-@Component
+@Service
 @Slf4j
 public class ExecuteCore implements InitializingBean {
 
-    //以事件触发此集合的更改,如果是分布式，其实可以进行redis存储此map,实现更快的task查询功能
-    protected static final Map<String, Task> TASK_LIST_MAP = new HashMap<>();
+    public static final String TASK_STATUS_START = "start";
+    public static final String TASK_STATUS_STOP = "stop";
 
-    public Map<String, Thread> THREAD_MAP = new HashMap<>();
+
+    //如果要集群，此map可以放入redis中
+    public static volatile Map<String, Task> TASK_MAP = new HashMap<>();
+
 
     @Autowired
     private TaskMapper taskMapper;
 
 
-
-
     /**
      * @fromInterface：InitializingBean
-     * @description: 实例加载到容器后进行的初始化
+     * @description: 启动服务器时，需要将所有 overdue = N 的task 加载到map里，且启动START状态的task线程
      **/
     @Override
     public void afterPropertiesSet() {
-        List<Task> tasks = taskMapper.findAll();
+        List<Task> tasks = taskMapper.findAll();   //需要针对task做筛选(condition : overdue = N)
         if (tasks == null || tasks.size() == 0) {
-            System.out.println("定时任务为null");
+            log.info("定时任务目前为null，请添加定时任务");
+            return;
         }
         for (Task task : tasks) {
-            TASK_LIST_MAP.put(task.getTaskId(), task);
-            Thread thread = createTask(task);
-            thread.start();
-
+            if (task.getOverdue().equals("N")) {
+                TASK_MAP.put(task.getTaskId(), task);
+                if (task.getStatus().equals(TASK_STATUS_START)) {
+                    startTask(task);
+                }
+            }
         }
     }
 
 
-    Thread createTask(Task task) {
-        //解析task的cron表达式
-        //通过解析cron表达式，得出下次执行的间隔时间
-        //将task的detail加入到任务执行当中，进行任务的定时执行
-        Thread thread = new Thread(() -> {
-            Long sleepTime = 2000L;   //解析出来的间隔时间，需要拿到全局去修改
-            while (true) {
-                log.info("执行任务:" + task.getTaskName() + "-" + task.getTaskId());
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.setName(task.getTaskId());
+    void startTask(Task task) {
 
-        THREAD_MAP.put(thread.getName(), thread);
-        return thread;
+        Thread thread = task.getThread();
+        if (thread == null) {
+            thread = new Thread(() -> {
+                while (TASK_MAP.get(task.getTaskId()).getStatus().equals(TASK_STATUS_START)) {
+                    //发现问题：同一时间，可能会执行两次（猜测是由于测试任务执行太快导致的）
+                    Long sleepTime = CronUtil.getTimeToNextExecution(task.getCron());
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                    log.info("执行任务:" + task.getTaskName() + "-" + task.getTaskId());
+                    Object obj = execute(TaskEnum.valueOf(task.getType()), task.getDetail());
+                }
+            });
+            thread.setName(task.getTaskId());
+            task.setThread(thread);
+        }
+        thread.start();
+        log.info(task.getTaskName() + "-" + thread.getName() + " 启动成功");
     }
+
+
+    public Object execute(TaskEnum type,String detail){
+        return null;
+    }
+
+    public Object executeShell(String path){
+        return null;
+    }
+
+    public Object executeCmd(String path){
+        return null;
+    }
+
+    public Object executeSpringCloudService(String url){
+        return null;
+    }
+
+    public Object executeHttpRequest(String url){
+        return null;
+    }
+
 
 }

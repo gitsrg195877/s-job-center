@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+
+
+spring:
+
+#  mvc:
+#    static-path-pattern: /static/**
+
+  #  thymeleaf:
+#    cache: true
+#    mode: HTML5
+#    servlet:
+#      content-type: text/xml
+#    prefix: classpath:/templates
+
+  jpa:
+    show-sql: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 195877
+    url: jdbc:mysql://localhost:3306/nova?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai    #UTC
+
+#logging:
+#  #  config: C:\srgWorkspace\MyGitHub\nova\user\src\main\resources\logback-spring.xml
+#  config: classpath:./logback-spring.xml

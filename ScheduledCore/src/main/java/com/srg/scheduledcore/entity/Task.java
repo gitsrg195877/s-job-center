@@ -41,10 +41,16 @@ public class Task {
     //创建时间
     private Date createTime;
 
+    //是否已经删除
+    private String overdue;
+
     //所属用户id
     private String userId;
 
-    //是否执行（start or stop）
-    private String status;
+    //是否执行（start or stop），同一时间段只能有一个线程修改此值
+    private volatile String status;
+
+    //不做持久化，用以程序运行时对任务线程的管理
+    private Thread thread;
 
 }

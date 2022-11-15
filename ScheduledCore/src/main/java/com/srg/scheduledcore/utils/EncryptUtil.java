@@ -8,7 +8,7 @@ import org.apache.commons.lang.RandomStringUtils;
  * @create: 2022/9/28
  * @description:
  **/
-public class MD5Util {
+public class EncryptUtil {
 
 
     /**
@@ -29,23 +29,23 @@ public class MD5Util {
 
     /**
      * 随机生成salt(盐)
-     * //产生5位长度的随机字符串，中文环境下是乱码
-     * RandomStringUtils.random(5);
+     * //产生8位长度的随机字符串，中文环境下是乱码
+     * RandomStringUtils.random(8);
      *
-     * //使用指定的字符生成5位长度的随机字符串
-     * RandomStringUtils.random(5, new char[]{'a','b','c','d','e','f', '1', '2', '3'});
+     * //使用指定的字符生成8位长度的随机字符串
+     * RandomStringUtils.random(8, new char[]{'a','b','c','d','e','f', '1', '2', '3'});
      *
      * //生成指定长度的字母和数字的随机组合字符串
-     * RandomStringUtils.randomAlphanumeric(5);
+     * RandomStringUtils.randomAlphanumeric(8);
      *
      * //生成随机数字字符串
-     * RandomStringUtils.randomNumeric(5);
+     * RandomStringUtils.randomNumeric(8);
      *
      * //生成随机[a-z]字符串，包含大小写
-     * RandomStringUtils.randomAlphabetic(5);
+     * RandomStringUtils.randomAlphabetic(8);
      *
      * //生成从ASCII 32到126组成的随机字符串
-     * RandomStringUtils.randomAscii(4)
+     * RandomStringUtils.randomAscii(8)
      **/
     public static String getSalt(){
         return RandomStringUtils.randomAscii(8);

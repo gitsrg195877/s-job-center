@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: scheduledCenter
+  cloud:
+    nacos:
+      server-addr: 1.12.236.246:8848

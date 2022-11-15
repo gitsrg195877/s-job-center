@@ -1,25 +1,29 @@
 package com.srg.scheduledcore.vo;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.ToString;
 
 /**
  * @author : SRG
  * @create : 2022/9/28
- * @describe :
+ * @describe : 
  **/
 
 @ToString
 @AllArgsConstructor
-public enum ResponseBean {
+@Getter
+public enum ResponseEnum {
+    
+    //登录
+    ERROR(500,"服务端异常"),
+    LOGIN_ERROR(500101,"用户名或者密码错误"),
 
-    ERROR(500,"服务端异常");
+    REGISTER_ERROR(500201,"用户已存在"),
 
     SUCCESS(200,"SUCCESS");
 
+    private final Integer code;
 
-
-    private int code;
-
-    private String message;
+    private final String message;
 }
